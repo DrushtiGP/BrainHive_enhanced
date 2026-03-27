@@ -1,0 +1,302 @@
+/* General Styling */
+body {
+  margin: 0;
+  font-family: 'Roboto', Arial, sans-serif;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+/* Header Styling */
+h1 {
+  font-size: 2.2em; /* Slightly smaller font */
+  text-align: center;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeIn 2s forwards 0.5s;
+}
+
+h2 {
+  font-size: 1.6em; /* Slightly smaller font */
+  margin-bottom: 15px;
+  opacity: 0;
+  animation: fadeIn 2s forwards 1s;
+}
+
+/* Container Styling */
+div {
+  max-width: 400px; /* Reduced width */
+  width: 90%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25px; /* Slightly less rounded */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Slightly softer shadow */
+  padding: 30px;
+  text-align: center;
+  opacity: 0;
+  animation: slideUp 1s forwards 1.5s;
+}
+
+/* Form Styling */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Reduced gap between inputs */
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 18px; /* Slightly less rounded */
+  padding: 12px;
+  font-size: 1em; /* Slightly smaller font */
+  color: #fff;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus {
+  background: rgba(255, 255, 255, 0.4);
+  outline: none;
+  transform: scale(1.05);
+}
+
+/* Button Styling */
+button {
+  background: #4caf50;
+  color: #fff;
+  padding: 12px 18px; /* Reduced padding */
+  border: none;
+  border-radius: 22px; /* Slightly less rounded */
+  font-size: 1em; /* Slightly smaller font */
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  margin: 15px 0;
+}
+
+button:hover {
+  background: #45a049;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+/* Links and Paragraphs */
+p {
+  font-size: 0.9em;
+  margin-top: 15px;
+}
+
+button + p {
+  margin-top: 20px;
+}
+
+/* Media Queries for Responsiveness */
+
+/* For devices with screen widths below 1024px */
+@media (max-width: 1024px) {
+  div {
+    width: 80%;
+    padding: 30px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.4em;
+  }
+
+  button {
+    font-size: 0.9em;
+  }
+}
+
+/* For devices with screen widths below 768px */
+@media (max-width: 768px) {
+  div {
+    width: 85%;
+    padding: 25px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  h2 {
+    font-size: 1.3em;
+  }
+
+  button {
+    font-size: 0.85em;
+    padding: 10px 14px;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    font-size: 0.9em;
+    padding: 10px;
+  }
+}
+
+/* For mobile devices with screen widths below 480px */
+@media (max-width: 480px) {
+  div {
+    width: 95%;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+
+  h2 {
+    font-size: 1.2em;
+  }
+
+  button {
+    font-size: 0.8em;
+    padding: 8px 12px;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    font-size: 0.8em;
+    padding: 8px;
+  }
+
+  p {
+    font-size: 0.8em;
+  }
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeInModal 0.5s ease;
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 20px; /* Rounded modal */
+  width: 80%;
+  max-width: 400px;
+  color: #333;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  animation: slideUpModal 1s ease-out;
+}
+
+/* Close Button */
+.close-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 50%;
+  font-size: 18px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.close-btn:hover {
+  background-color: #e53935;
+}
+
+/* Messages Container */
+.messages-container {
+  margin-top: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+}
+
+.message {
+  background-color: #f1f1f1;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  opacity: 0;
+  animation: fadeInMessage 1s forwards;
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInMessage {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

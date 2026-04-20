@@ -81,7 +81,8 @@ const groupsSlice = createSlice({
     builder
       .addCase(fetchUserGroups.fulfilled, (state, action) => { state.list = action.payload || []; })
       .addCase(fetchUserGroups.rejected, (state) => { state.list = []; })
-      .addCase(fetchGroupById.fulfilled, (state, action) => { state.currentGroup = action.payload; })
+      .addCase(fetchGroupById.fulfilled, (state, action) => { state.currentGroup = action.payload; state.error = null; })
+      .addCase(fetchGroupById.rejected, (state, action) => { state.error = action.payload; })
       .addCase(createGroup.fulfilled, (state) => { state.status = 'idle'; })
       .addCase(leaveGroup.fulfilled, (state, action) => {
         state.list = state.list.filter(g => g.id !== action.payload.groupId);

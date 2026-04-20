@@ -1,9 +1,65 @@
 const express = require('express');
 const db = require('../config/db');
 const { requireAuth, makeRequireGroupLeader } = require('../middleware/auth');
+const { query, PROMPTS } = require('../services/aiService');
 
 const router = express.Router();
 const requireGroupLeader = makeRequireGroupLeader(db);
+
+// Helper: trigger onboarding agent asynchronously (fire-and-forget)
+function triggerOnboarding(userId, groupId) {
+  db.query('SELECT * FROM `groups` WHERE id = ?', [groupId], (err, groupRows) => {
+    if (err || !groupRows.length) return;
+    const group = groupRows[0];
+
+    db.query('SELECT name FROM users WHERE id = ?', [userId], (err, userRows) => {
+      if (err || !userRows.length) return;
+      const userName = userRows[0].name;
+
+      db.query(
+        'SELECT topic, timing FROM sessions WHERE group_id = ? AND timing > NOW() ORDER BY timing ASC LIMIT 3',
+        [groupId],
+        (err, sessions) => {
+          if (err) sessions = [];
+          db.query(
+            `SELECT u.name FROM users u
+             JOIN group_membership gm ON gm.user_id = u.id
+             WHERE gm.group_id = ? AND gm.status = 'accepted' AND u.id != ?
+             LIMIT 8`,
+            [groupId, userId],
+            async (err, members) => {
+              if (err) members = [];
+              try {
+                const prompt = PROMPTS.onboarding({
+                  userName,
+                  groupName: group.name,
+                  groupDescription: group.description,
+                  upcomingSessions: sessions || [],
+                  activeMembers: members || [],
+                });
+                const welcomeMessage = await query(prompt);
+                const botMsg = `👋 ${welcomeMessage}`;
+                db.query(
+                  'INSERT INTO messages (group_id, user_id, message, is_bot) VALUES (?, 1, ?, 1)',
+                  [groupId, botMsg],
+                  () => {}
+                );
+              } catch (e) {
+                // Fallback welcome
+                const fallback = `👋 Welcome to "${group.name}", ${userName}! Check the Sessions tab for upcoming study sessions and use @bot for academic help.`;
+                db.query(
+                  'INSERT INTO messages (group_id, user_id, message, is_bot) VALUES (?, 1, ?, 1)',
+                  [groupId, fallback],
+                  () => {}
+                );
+              }
+            }
+          );
+        }
+      );
+    });
+  });
+}
 
 // POST /groups — create a group (creator auto-added as accepted member)
 router.post('/', requireAuth, (req, res) => {
@@ -85,6 +141,12 @@ router.put('/:groupId/members/:memberId', requireAuth, requireGroupLeader, (req,
     (err, result) => {
       if (err) return res.status(500).json({ error: 'Internal server error.' });
       if (result.affectedRows === 0) return res.status(404).json({ error: 'Membership not found.' });
+
+      // Trigger onboarding agent when a member is accepted
+      if (status === 'accepted') {
+        triggerOnboarding(parseInt(req.params.memberId), parseInt(req.params.groupId));
+      }
+
       res.json({ message: `Membership ${status}.` });
     }
   );

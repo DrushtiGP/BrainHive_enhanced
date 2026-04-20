@@ -27,6 +27,8 @@ const Header = () => {
     transition: 'color 0.2s',
   });
 
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   return (
     <nav style={{
       padding: '0 32px',
@@ -47,10 +49,15 @@ const Header = () => {
 
       {user && (
         <>
-          <Link to="/home" style={linkStyle('/home')}>Home</Link>
-          <Link to="/create-group" style={linkStyle('/create-group')}>Create Group</Link>
-          <Link to="/join-group" style={linkStyle('/join-group')}>Join Group</Link>
-          <Link to="/profile" style={linkStyle('/profile')}>Profile</Link>
+          {/* Hide regular nav on admin page */}
+          {!isAdminPage && (
+            <>
+              <Link to="/home" style={linkStyle('/home')}>Home</Link>
+              <Link to="/create-group" style={linkStyle('/create-group')}>Create Group</Link>
+              <Link to="/join-group" style={linkStyle('/join-group')}>Join Group</Link>
+              <Link to="/profile" style={linkStyle('/profile')}>Profile</Link>
+            </>
+          )}
           <RoleGuard requiredRole="admin">
             <Link to="/admin" style={{ ...linkStyle('/admin'), color: isActive('/admin') ? '#fbbf24' : '#f0a500' }}>Admin</Link>
           </RoleGuard>

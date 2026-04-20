@@ -79,6 +79,7 @@ function createTables() {
         group_id INT NOT NULL,
         user_id INT NOT NULL,
         message TEXT NOT NULL,
+        is_bot BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (group_id) REFERENCES \`groups\`(id),
         FOREIGN KEY (user_id) REFERENCES users(id)
@@ -117,21 +118,32 @@ function createTables() {
 // Safely add columns that may not exist in older installs
 function runColumnMigrations() {
   const migrations = [
-    { column: 'role',                  sql: "ALTER TABLE users ADD COLUMN role ENUM('admin', 'user') NOT NULL DEFAULT 'user'" },
-    { column: 'field_of_study',        sql: "ALTER TABLE users ADD COLUMN field_of_study VARCHAR(100) DEFAULT NULL" },
-    { column: 'field_of_study_custom', sql: "ALTER TABLE users ADD COLUMN field_of_study_custom VARCHAR(100) DEFAULT NULL" },
+    { table: 'users',    column: 'role',                  sql: "ALTER TABLE users ADD COLUMN role ENUM('admin', 'user') NOT NULL DEFAULT 'user'" },
+    { table: 'users',    column: 'field_of_study',        sql: "ALTER TABLE users ADD COLUMN field_of_study VARCHAR(100) DEFAULT NULL" },
+    { table: 'users',    column: 'field_of_study_custom', sql: "ALTER TABLE users ADD COLUMN field_of_study_custom VARCHAR(100) DEFAULT NULL" },
+    { table: 'messages', column: 'is_bot',                sql: "ALTER TABLE messages ADD COLUMN is_bot BOOLEAN NOT NULL DEFAULT FALSE" },
+    { table: 'sessions', column: 'summary',               sql: "ALTER TABLE sessions ADD COLUMN summary TEXT DEFAULT NULL" },
   ];
 
-  db.query("SHOW COLUMNS FROM users", (err, columns) => {
-    if (err) { console.error('Migration check failed:', err); return; }
-    const existing = columns.map(c => c.Field);
-    migrations.forEach(({ column, sql }) => {
-      if (!existing.includes(column)) {
-        db.query(sql, err => {
-          if (err) console.error(`Failed to add column ${column}:`, err);
-          else console.log(`  ✓ users.${column} column added`);
-        });
-      }
+  // Group migrations by table
+  const byTable = {};
+  migrations.forEach(m => {
+    if (!byTable[m.table]) byTable[m.table] = [];
+    byTable[m.table].push(m);
+  });
+
+  Object.entries(byTable).forEach(([table, cols]) => {
+    db.query(`SHOW COLUMNS FROM \`${table}\``, (err, columns) => {
+      if (err) { console.error(`Migration check failed for ${table}:`, err); return; }
+      const existing = columns.map(c => c.Field);
+      cols.forEach(({ column, sql }) => {
+        if (!existing.includes(column)) {
+          db.query(sql, err => {
+            if (err) console.error(`Failed to add column ${table}.${column}:`, err);
+            else console.log(`  ✓ ${table}.${column} column added`);
+          });
+        }
+      });
     });
   });
 }

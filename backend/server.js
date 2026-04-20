@@ -11,6 +11,7 @@ const membershipRoutes = require('./routes/membership');
 const sessionRoutes    = require('./routes/sessions');
 const messageRoutes    = require('./routes/messages');
 const adminRoutes      = require('./routes/admin');
+const agentRoutes      = require('./routes/agents');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -44,6 +45,7 @@ app.use('/group-membership', membershipRoutes);
 app.use('/sessions',       sessionRoutes);
 app.use('/messages',       messageRoutes);
 app.use('/admin',          adminRoutes);
+app.use('/agents',         agentRoutes);
 
 app.listen(port, () => {
   console.log(`BrainHive server running on port ${port}`);

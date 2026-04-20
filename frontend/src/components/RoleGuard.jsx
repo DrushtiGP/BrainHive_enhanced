@@ -20,7 +20,7 @@ const RoleGuard = ({ requiredRole, creatorId, fallback = null, redirect = false,
     return redirect ? <Navigate to="/unauthorized" replace /> : fallback;
   }
 
-  if (creatorId !== undefined && user.id !== creatorId) {
+  if (creatorId !== undefined && Number(user.id) !== Number(creatorId)) {
     return fallback;
   }
 

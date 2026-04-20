@@ -50,7 +50,7 @@ function makeRequireGroupLeader(db) {
   return function requireGroupLeader(req, res, next) {
     const groupId = req.params.groupId;
 
-    db.query('SELECT creator_id FROM groups WHERE id = ?', [groupId], (err, results) => {
+    db.query('SELECT creator_id FROM `groups` WHERE id = ?', [groupId], (err, results) => {
       if (err) {
         return res.status(500).json({ error: 'Internal server error.' });
       }
@@ -61,7 +61,7 @@ function makeRequireGroupLeader(db) {
 
       const group = results[0];
 
-      if (req.user.userId === group.creator_id || req.user.role === 'admin') {
+      if (Number(req.user.userId) === Number(group.creator_id) || req.user.role === 'admin') {
         return next();
       }
 

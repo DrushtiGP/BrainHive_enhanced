@@ -38,7 +38,7 @@ router.get('/', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'groupId query param is required.' });
   }
   db.query(
-    `SELECT m.id, m.group_id, m.user_id, m.message, m.created_at, u.name AS sender_name
+    `SELECT m.id, m.group_id, m.user_id, m.message, m.is_bot, m.created_at, u.name AS sender_name
      FROM messages m
      JOIN users u ON m.user_id = u.id
      WHERE m.group_id = ?

@@ -206,7 +206,7 @@ const AdminDashboard = () => {
                       {u.role || 'user'}
                     </span>
                   </td>
-                  <td style={{ color: '#9ca3af', fontSize: 12 }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                  <td style={{ color: '#09090bff', fontSize: 12 }}>{new Date(u.created_at).toLocaleDateString()}</td>
                   <td>
                     <button className="btn-danger" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => handleDeleteUser(u.id)}>
                       Delete
@@ -215,7 +215,7 @@ const AdminDashboard = () => {
                 </tr>
               ))}
               {users.length === 0 && (
-                <tr><td colSpan={6} style={{ textAlign: 'center', color: '#6b7280' }}>No users found.</td></tr>
+                <tr><td colSpan={6} style={{ textAlign: 'center', color: '#0c0f14ff' }}>No users found.</td></tr>
               )}
             </tbody>
           </table>
@@ -225,7 +225,7 @@ const AdminDashboard = () => {
       {/* ── GROUPS TAB ── */}
       {tab === 'groups' && (
         <div style={{ marginTop: 16 }}>
-          <p style={{ color: '#9ca3af', fontSize: 13, marginBottom: 12 }}>
+          <p style={{ color: '#07080aff', fontSize: 13, marginBottom: 12 }}>
             {groups.length} group{groups.length !== 1 ? 's' : ''} on the platform
           </p>
           <table className="data-table">
@@ -237,9 +237,9 @@ const AdminDashboard = () => {
                 <tr key={g.id}>
                   <td>{g.id}</td>
                   <td>{g.name}</td>
-                  <td style={{ color: '#9ca3af', fontSize: 12, maxWidth: 200 }}>{g.description || '—'}</td>
+                  <td style={{ color: '#0d1015ff', fontSize: 12, maxWidth: 200 }}>{g.description || '—'}</td>
                   <td>{g.creator_id}</td>
-                  <td style={{ color: '#9ca3af', fontSize: 12 }}>{new Date(g.created_at).toLocaleDateString()}</td>
+                  <td style={{ color: '#0e1217ff', fontSize: 12 }}>{new Date(g.created_at).toLocaleDateString()}</td>
                   <td>
                     <button className="btn-danger" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => handleDeleteGroup(g.id)}>
                       Delete
@@ -258,7 +258,7 @@ const AdminDashboard = () => {
       {/* ── PENDING REQUESTS TAB ── */}
       {tab === 'pending' && (
         <div style={{ marginTop: 16 }}>
-          <p style={{ color: '#9ca3af', fontSize: 13, marginBottom: 12 }}>
+          <p style={{ color: '#090b0eff', fontSize: 13, marginBottom: 12 }}>
             {pendingRequests.length} pending join request{pendingRequests.length !== 1 ? 's' : ''} platform-wide
           </p>
           <table className="data-table">
@@ -269,9 +269,9 @@ const AdminDashboard = () => {
               {pendingRequests.map(r => (
                 <tr key={r.id}>
                   <td>{r.user_name}</td>
-                  <td style={{ color: '#9ca3af', fontSize: 12 }}>{r.user_email}</td>
+                  <td style={{ color: '#060709ff', fontSize: 12 }}>{r.user_email}</td>
                   <td>{r.group_name}</td>
-                  <td style={{ color: '#9ca3af', fontSize: 12 }}>{new Date(r.created_at).toLocaleString()}</td>
+                  <td style={{ color: '#06080bff', fontSize: 12 }}>{new Date(r.created_at).toLocaleString()}</td>
                 </tr>
               ))}
               {pendingRequests.length === 0 && (
@@ -292,8 +292,8 @@ const AdminDashboard = () => {
             padding: '16px 20px',
             marginBottom: 24,
           }}>
-            <h3 style={{ color: '#c7d2fe', margin: '0 0 6px' }}>👋 Onboarding Agent</h3>
-            <p style={{ color: '#9ca3af', fontSize: 13, margin: 0 }}>
+            <h3 style={{ color: '#020304ff', margin: '0 0 6px' }}>👋 Onboarding Agent</h3>
+            <p style={{ color: '#080b11ff', fontSize: 13, margin: 0 }}>
               Manually trigger a personalised welcome message for any user in any group.
               The AI generates a message with group details, upcoming sessions, and active members.
             </p>
@@ -303,7 +303,7 @@ const AdminDashboard = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28 }}>
             {/* Users reference */}
             <div>
-              <h4 style={{ color: '#e5e7eb', fontSize: 13, marginBottom: 8 }}>Available Users (for User ID)</h4>
+              <h4 style={{ color: '#060709ff', fontSize: 13, marginBottom: 8 }}>Available Users (for User ID)</h4>
               <div style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -315,9 +315,9 @@ const AdminDashboard = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#9ca3af' }}>ID</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#9ca3af' }}>Name</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#9ca3af' }}>Email</th>
+                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#0d0e11ff' }}>ID</th>
+                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#090a0bff' }}>Name</th>
+                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#090a0bff' }}>Email</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -328,8 +328,8 @@ const AdminDashboard = () => {
                         onClick={() => setOnboardUserId(String(u.id))}
                       >
                         <td style={{ padding: '7px 12px', color: '#818cf8', fontWeight: 600 }}>{u.id}</td>
-                        <td style={{ padding: '7px 12px', color: '#e5e7eb' }}>{u.name}</td>
-                        <td style={{ padding: '7px 12px', color: '#9ca3af', fontSize: 12 }}>{u.email}</td>
+                        <td style={{ padding: '7px 12px', color: '#0a0b0dff' }}>{u.name}</td>
+                        <td style={{ padding: '7px 12px', color: '#07080aff', fontSize: 12 }}>{u.email}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -340,7 +340,7 @@ const AdminDashboard = () => {
 
             {/* Groups reference */}
             <div>
-              <h4 style={{ color: '#e5e7eb', fontSize: 13, marginBottom: 8 }}>Available Groups (for Group ID)</h4>
+              <h4 style={{ color: '#07090dff', fontSize: 13, marginBottom: 8 }}>Available Groups (for Group ID)</h4>
               <div style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.08)',
@@ -352,8 +352,8 @@ const AdminDashboard = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#9ca3af' }}>ID</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#9ca3af' }}>Name</th>
+                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#06070aff' }}>ID</th>
+                      <th style={{ padding: '8px 12px', textAlign: 'left', color: '#0c0e13ff' }}>Name</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -364,7 +364,7 @@ const AdminDashboard = () => {
                         onClick={() => setOnboardGroupId(String(g.id))}
                       >
                         <td style={{ padding: '7px 12px', color: '#818cf8', fontWeight: 600 }}>{g.id}</td>
-                        <td style={{ padding: '7px 12px', color: '#e5e7eb' }}>{g.name}</td>
+                        <td style={{ padding: '7px 12px', color: '#0c0d0fff' }}>{g.name}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -376,7 +376,7 @@ const AdminDashboard = () => {
 
           {/* Trigger form */}
           <form onSubmit={handleOnboard} style={{ maxWidth: 480 }}>
-            <h4 style={{ color: '#e5e7eb', marginBottom: 14 }}>Trigger Onboarding</h4>
+            <h4 style={{ color: '#060708ff', marginBottom: 14 }}>Trigger Onboarding</h4>
             <div className="form-group">
               <label className="form-label">User ID</label>
               <input
@@ -438,8 +438,8 @@ const AdminDashboard = () => {
             gap: 16,
           }}>
             <div>
-              <h3 style={{ color: '#c7d2fe', margin: '0 0 4px' }}>🛠️ Platform Health Agent</h3>
-              <p style={{ color: '#9ca3af', fontSize: 13, margin: 0 }}>
+              <h3 style={{ color: '#0b0c0eff', margin: '0 0 4px' }}>🛠️ Platform Health Agent</h3>
+              <p style={{ color: '#101215ff', fontSize: 13, margin: 0 }}>
                 AI-powered diagnostics — identifies inactive groups, stale requests, and anomalies.
               </p>
             </div>

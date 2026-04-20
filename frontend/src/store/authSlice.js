@@ -10,9 +10,9 @@ export const loginUser = createAsyncThunk('auth/login', async ({ email, password
   }
 });
 
-export const registerUser = createAsyncThunk('auth/register', async ({ name, email, password, university, fieldOfStudy, yearOfStudy }, { rejectWithValue }) => {
+export const registerUser = createAsyncThunk('auth/register', async ({ name, email, password, fieldOfStudy, fieldOfStudyCustom }, { rejectWithValue }) => {
   try {
-    const res = await api.post('/register', { name, email, password, university, fieldOfStudy, yearOfStudy });
+    const res = await api.post('/register', { name, email, password, fieldOfStudy, fieldOfStudyCustom });
     return res.data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.error || 'Registration failed');

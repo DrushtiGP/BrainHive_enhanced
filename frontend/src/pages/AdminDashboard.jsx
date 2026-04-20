@@ -65,77 +65,76 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Admin Dashboard</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="page-container-wide">
+      <h2 className="page-title">Admin Dashboard</h2>
+      {error && <p style={{ color: '#ef4444', marginBottom: 12 }}>{error}</p>}
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {['users', 'groups', 'pending'].map((t) => (
-          <button key={t} onClick={() => { setError(''); setTab(t); }}
-            style={{ fontWeight: tab === t ? 'bold' : 'normal', textTransform: 'capitalize' }}>
-            {t === 'pending' ? 'Pending Requests' : t.charAt(0).toUpperCase() + t.slice(1)}
-          </button>
-        ))}
-      </div>
+      <div className="tab-bar" style={{ marginTop: 20 }}>
+          {['users', 'groups', 'pending'].map((t) => (
+            <button
+              key={t}
+              className={`tab-btn${tab === t ? ' active' : ''}`}
+              onClick={() => { setError(''); setTab(t); }}
+            >
+              {t === 'pending' ? 'Pending Requests' : t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          ))}
+        </div>
 
-      {tab === 'users' && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>{['ID', 'Name', 'Email', 'Role', 'Actions'].map(h => <th key={h} style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #ccc' }}>{h}</th>)}</tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td style={{ padding: 8 }}>{u.id}</td>
-                <td style={{ padding: 8 }}>{u.name}</td>
-                <td style={{ padding: 8 }}>{u.email}</td>
-                <td style={{ padding: 8 }}>user</td>
-                <td style={{ padding: 8 }}>
-                  <button onClick={() => handleDeleteUser(u.id)} style={{ color: 'red' }}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {tab === 'users' && (
+          <table className="data-table">
+            <thead>
+              <tr>{['ID', 'Name', 'Email', 'Role', 'Actions'].map(h => <th key={h}>{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td>{u.id}</td>
+                  <td>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>user</td>
+                  <td><button className="btn-danger" onClick={() => handleDeleteUser(u.id)}>Delete</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-      {tab === 'groups' && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>{['ID', 'Name', 'Creator ID', 'Actions'].map(h => <th key={h} style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #ccc' }}>{h}</th>)}</tr>
-          </thead>
-          <tbody>
-            {groups.map((g) => (
-              <tr key={g.id}>
-                <td style={{ padding: 8 }}>{g.id}</td>
-                <td style={{ padding: 8 }}>{g.name}</td>
-                <td style={{ padding: 8 }}>{g.creator_id}</td>
-                <td style={{ padding: 8 }}>
-                  <button onClick={() => handleDeleteGroup(g.id)} style={{ color: 'red' }}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {tab === 'groups' && (
+          <table className="data-table">
+            <thead>
+              <tr>{['ID', 'Name', 'Creator ID', 'Actions'].map(h => <th key={h}>{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {groups.map((g) => (
+                <tr key={g.id}>
+                  <td>{g.id}</td>
+                  <td>{g.name}</td>
+                  <td>{g.creator_id}</td>
+                  <td><button className="btn-danger" onClick={() => handleDeleteGroup(g.id)}>Delete</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-      {tab === 'pending' && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>{['User', 'Email', 'Group', 'Requested At'].map(h => <th key={h} style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #ccc' }}>{h}</th>)}</tr>
-          </thead>
-          <tbody>
-            {pendingRequests.map((r) => (
-              <tr key={r.id}>
-                <td style={{ padding: 8 }}>{r.user_name}</td>
-                <td style={{ padding: 8 }}>{r.user_email}</td>
-                <td style={{ padding: 8 }}>{r.group_name}</td>
-                <td style={{ padding: 8 }}>{new Date(r.created_at).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        {tab === 'pending' && (
+          <table className="data-table">
+            <thead>
+              <tr>{['User', 'Email', 'Group', 'Requested At'].map(h => <th key={h}>{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {pendingRequests.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.user_name}</td>
+                  <td>{r.user_email}</td>
+                  <td>{r.group_name}</td>
+                  <td>{new Date(r.created_at).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
     </div>
   );
 };

@@ -2,32 +2,37 @@ const mysql = require('mysql');
 
 const DB_NAME = process.env.DB_NAME || 'brainhive';
 
-// Connect without specifying a database first so we can create it if needed
-const db = mysql.createConnection({
-  host:              process.env.DB_HOST     || 'localhost',
-  user:              process.env.DB_USER     || 'root',
-  password:          process.env.DB_PASSWORD || '',
-  multipleStatements: true,
+// Step 1: connect without a database to create it if needed
+const bootstrap = mysql.createConnection({
+  host:     process.env.DB_HOST     || 'localhost',
+  user:     process.env.DB_USER     || 'root',
+  password: process.env.DB_PASSWORD || '',
 });
 
-db.connect(err => {
-  if (err) {
-    console.error('MySQL connection error:', err);
-    process.exit(1);
-  }
+// The real connection used by all routes — exported immediately so require() works
+const db = mysql.createConnection({
+  host:     process.env.DB_HOST     || 'localhost',
+  user:     process.env.DB_USER     || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: DB_NAME,
+});
 
-  // Create the database if it doesn't exist, then switch to it
-  db.query(
-    `CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`; USE \`${DB_NAME}\`;`,
-    err => {
-      if (err) {
-        console.error('Failed to initialise database:', err);
-        process.exit(1);
-      }
-      console.log(`Database "${DB_NAME}" ready`);
+bootstrap.connect(err => {
+  if (err) { console.error('MySQL bootstrap error:', err); process.exit(1); }
+
+  bootstrap.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\``, err => {
+    bootstrap.end(); // done with bootstrap connection
+    if (err) { console.error('Failed to create database:', err); process.exit(1); }
+
+    console.log(`Database "${DB_NAME}" ready`);
+
+    // Now connect the real db connection
+    db.connect(err => {
+      if (err) { console.error('Database connection error:', err); process.exit(1); }
+      console.log(`Connected to "${DB_NAME}"`);
       createTables();
-    }
-  );
+    });
+  });
 });
 
 function createTables() {
@@ -40,9 +45,8 @@ function createTables() {
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
-        university VARCHAR(150) DEFAULT NULL,
         field_of_study VARCHAR(100) DEFAULT NULL,
-        year_of_study TINYINT DEFAULT NULL,
+        field_of_study_custom VARCHAR(100) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
     },
@@ -94,9 +98,11 @@ function createTables() {
     },
   ];
 
-  // Run sequentially to respect foreign key order
   const runNext = (i) => {
-    if (i >= tables.length) return;
+    if (i >= tables.length) {
+      runColumnMigrations();
+      return;
+    }
     const { name, sql } = tables[i];
     db.query(sql, err => {
       if (err) throw err;
@@ -106,6 +112,28 @@ function createTables() {
   };
 
   runNext(0);
+}
+
+// Safely add columns that may not exist in older installs
+function runColumnMigrations() {
+  const migrations = [
+    { column: 'role',                  sql: "ALTER TABLE users ADD COLUMN role ENUM('admin', 'user') NOT NULL DEFAULT 'user'" },
+    { column: 'field_of_study',        sql: "ALTER TABLE users ADD COLUMN field_of_study VARCHAR(100) DEFAULT NULL" },
+    { column: 'field_of_study_custom', sql: "ALTER TABLE users ADD COLUMN field_of_study_custom VARCHAR(100) DEFAULT NULL" },
+  ];
+
+  db.query("SHOW COLUMNS FROM users", (err, columns) => {
+    if (err) { console.error('Migration check failed:', err); return; }
+    const existing = columns.map(c => c.Field);
+    migrations.forEach(({ column, sql }) => {
+      if (!existing.includes(column)) {
+        db.query(sql, err => {
+          if (err) console.error(`Failed to add column ${column}:`, err);
+          else console.log(`  ✓ users.${column} column added`);
+        });
+      }
+    });
+  });
 }
 
 module.exports = db;

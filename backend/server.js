@@ -27,13 +27,14 @@ app.use(cors({
 
 app.use(bodyParser.json({ limit: '50kb' })); // cap request body size
 
-// Rate limiting on auth endpoints
+// Rate limiting on auth endpoints — relaxed for development
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV !== 'production', // disable in dev
 });
 
 // Mount routes

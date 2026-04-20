@@ -14,29 +14,29 @@ const Dashboard = () => {
   }, [user, dispatch]);
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Welcome back, {user?.name}!</h2>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-        <button onClick={() => navigate('/create-group')}>Create Group</button>
-        <button onClick={() => navigate('/join-group')}>Join Group</button>
-        <button onClick={() => navigate('/messages')}>Messages</button>
-        <button onClick={() => navigate('/sessions')}>Sessions</button>
+    <div className="page-container">
+      <div className="dashboard-welcome">
+        <h2>Welcome back, {user?.name}!</h2>
+        <p className="page-subtitle">Find your groups or start a new one.</p>
       </div>
 
-      <h3>Your Groups</h3>
+      <div className="dashboard-actions">
+        <button className="btn-primary" onClick={() => navigate('/create-group')}>+ Create Group</button>
+        <button className="btn-secondary" onClick={() => navigate('/join-group')}>Join a Group</button>
+      </div>
+
+      <h3 className="section-heading" style={{ marginTop: 0 }}>Your Groups</h3>
       {groups.length === 0 ? (
-        <p>You're not in any groups yet. Create or join one!</p>
+        <div className="empty-state">
+          <p>You're not in any groups yet.</p>
+          <p style={{ marginTop: 8 }}>Create one or join an existing group to get started.</p>
+        </div>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="group-list">
           {groups.map((g) => (
-            <li key={g.id} style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
-              <button
-                onClick={() => navigate(`/groups/${g.id}`)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: 16 }}
-              >
-                {g.name}
-              </button>
-              <span style={{ marginLeft: 8, color: '#666', fontSize: 14 }}>{g.description}</span>
+            <li key={g.id} className="group-list-item" onClick={() => navigate(`/groups/${g.id}`)}>
+              <span className="group-list-item-name">{g.name}</span>
+              {g.description && <span className="group-list-item-desc">{g.description}</span>}
             </li>
           ))}
         </ul>

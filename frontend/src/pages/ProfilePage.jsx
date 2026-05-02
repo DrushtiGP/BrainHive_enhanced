@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCredentials } from '../store/authSlice';
 import { addNotification } from '../store/notificationsSlice';
+import PasswordInput from '../components/PasswordInput';
 import api from '../api';
 
 const FIELD_OPTIONS = [
@@ -26,7 +27,6 @@ const FIELD_OPTIONS = [
   { value: 'law', label: 'Law' },
   { value: 'political_science', label: 'Political Science' },
   { value: 'international_relations', label: 'International Relations' },
-  { value: 'business_administration', label: 'Business Administration' },
   { value: 'finance', label: 'Finance' },
   { value: 'accounting', label: 'Accounting' },
   { value: 'economics', label: 'Economics' },
@@ -63,14 +63,13 @@ const FIELD_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
-const fieldBlock = (label, children) => (
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: 4, fontSize: 13, color: '#555' }}>{label}</label>
-    {children}
-  </div>
-);
-
-const inputStyle = { width: '100%', padding: 8, boxSizing: 'border-box', border: '1px solid #ccc', borderRadius: 4 };
+const card = {
+  background: '#fff',
+  borderRadius: 16,
+  border: '1px solid #ede9fe',
+  padding: '32px 28px',
+  boxShadow: '0 2px 12px rgba(124,58,237,0.06)',
+};
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -131,68 +130,128 @@ const ProfilePage = () => {
     }
   };
 
-  if (loading) return <div className="page-container"><p style={{ color: '#9ca3af' }}>Loading profile...</p></div>;
+  if (loading) return (
+    <div style={{ maxWidth: 860, margin: '0 auto', padding: '40px 32px', color: '#9ca3af' }}>
+      Loading profile...
+    </div>
+  );
+
+  const initials = (authUser?.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const fieldLabel = FIELD_OPTIONS.find(o => o.value === form.fieldOfStudy)?.label;
 
   return (
-    <div className="page-container-wide">
-      <h2 className="page-title" style={{ marginBottom: 8 }}>My Profile</h2>
-      <p className="page-subtitle">Manage your personal info and password.</p>
+    <div style={{ maxWidth: 1400, margin: '0 auto', padding: '40px 48px' }}>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginTop: 32, alignItems: 'start' }}>
-        <div className="page-card">
-          <h3 className="section-heading" style={{ marginTop: 0 }}>Personal Info</h3>
-          <form onSubmit={handleSaveProfile}>
-
-          <div className="form-group">
-            <label className="form-label">Full Name</label>
-            <input className="form-input" type="text" value={form.name} onChange={set('name')} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input className="form-input" type="email" value={authUser?.email || ''} disabled />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Field of Study</label>
-            <select className="form-input" value={form.fieldOfStudy} onChange={set('fieldOfStudy')}>
-              <option value="">Not specified</option>
-              {FIELD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          {form.fieldOfStudy === 'other' && (
-            <div className="form-group">
-              <label className="form-label">Please specify</label>
-              <input className="form-input" type="text" value={form.fieldOfStudyCustom} onChange={set('fieldOfStudyCustom')} maxLength={100} />
-            </div>
-          )}
-          <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </form>
+      {/* ── Profile hero ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+        borderRadius: 20,
+        padding: '32px 36px',
+        marginBottom: 32,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 24,
+      }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.2)',
+          border: '3px solid rgba(255,255,255,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 26, fontWeight: 800, color: '#fff', flexShrink: 0,
+        }}>
+          {initials}
         </div>
+        <div>
+          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>{authUser?.name}</h2>
+          <p style={{ color: 'rgba(255,255,255,0.75)', margin: '4px 0 0', fontSize: '0.9rem' }}>{authUser?.email}</p>
+          {fieldLabel && (
+            <span style={{
+              display: 'inline-block', marginTop: 8,
+              background: 'rgba(255,255,255,0.2)', borderRadius: 20,
+              padding: '3px 12px', fontSize: 12, color: '#fff', fontWeight: 600,
+            }}>
+              {fieldLabel}
+            </span>
+          )}
+        </div>
+      </div>
 
-        <div className="page-card">
-          <h3 className="section-heading" style={{ marginTop: 0 }}>Change Password</h3>
-          <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 16 }}>Min 8 characters, at least one letter and one number.</p>
+      {/* ── Two cards ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
 
-          <form onSubmit={handleChangePassword}>
+        {/* Personal Info */}
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+            }}>👤</div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#1e1b4b' }}>Personal Info</h3>
+              <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Update your name and field of study</p>
+            </div>
+          </div>
 
-          <div className="form-group">
-            <label className="form-label">Current Password</label>
-            <input className="form-input" type="password" value={pwForm.currentPassword} onChange={setPw('currentPassword')} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">New Password</label>
-            <input className="form-input" type="password" value={pwForm.newPassword} onChange={setPw('newPassword')} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Confirm New Password</label>
-            <input className="form-input" type="password" value={pwForm.confirmPassword} onChange={setPw('confirmPassword')} required />
-          </div>
-          <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? 'Saving...' : 'Change Password'}
-          </button>
+          <form onSubmit={handleSaveProfile}>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <input className="form-input" type="text" value={form.name} onChange={set('name')} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input className="form-input" type="email" value={authUser?.email || ''} disabled />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Field of Study</label>
+              <select className="form-input" value={form.fieldOfStudy} onChange={set('fieldOfStudy')}>
+                <option value="">Not specified</option>
+                {FIELD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+            {form.fieldOfStudy === 'other' && (
+              <div className="form-group">
+                <label className="form-label">Please specify</label>
+                <input className="form-input" type="text" value={form.fieldOfStudyCustom} onChange={set('fieldOfStudyCustom')} maxLength={100} />
+              </div>
+            )}
+            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: 4 }} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
           </form>
         </div>
+
+        {/* Change Password */}
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+            }}>🔒</div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#1e1b4b' }}>Change Password</h3>
+              <p style={{ margin: 0, fontSize: 12, color: '#9ca3af' }}>Min 8 chars, one letter and one number</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleChangePassword}>
+            <div className="form-group">
+              <label className="form-label">Current Password</label>
+              <PasswordInput className="form-input" value={pwForm.currentPassword} onChange={setPw('currentPassword')} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">New Password</label>
+              <PasswordInput className="form-input" value={pwForm.newPassword} onChange={setPw('newPassword')} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Confirm New Password</label>
+              <PasswordInput className="form-input" value={pwForm.confirmPassword} onChange={setPw('confirmPassword')} required />
+            </div>
+            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: 4 }} disabled={saving}>
+              {saving ? 'Saving...' : 'Change Password'}
+            </button>
+          </form>
+        </div>
+
       </div>
     </div>
   );

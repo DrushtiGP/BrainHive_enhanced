@@ -97,6 +97,60 @@ function createTables() {
         FOREIGN KEY (group_id) REFERENCES \`groups\`(id)
       )`,
     },
+    {
+      name: 'resources',
+      sql: `CREATE TABLE IF NOT EXISTS resources (
+        id            INT AUTO_INCREMENT PRIMARY KEY,
+        group_id      INT NOT NULL,
+        user_id       INT NOT NULL,
+        filename      VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
+        mimetype      VARCHAR(100) NOT NULL,
+        size          INT NOT NULL,
+        created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (group_id) REFERENCES \`groups\`(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id)  REFERENCES users(id)      ON DELETE CASCADE
+      )`,
+    },
+    {
+      name: 'flashcards',
+      sql: `CREATE TABLE IF NOT EXISTS flashcards (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        group_id   INT NOT NULL,
+        user_id    INT NOT NULL,
+        front      VARCHAR(500) NOT NULL,
+        back       VARCHAR(1000) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (group_id) REFERENCES \`groups\`(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id)  REFERENCES users(id)      ON DELETE CASCADE
+      )`,
+    },
+    {
+      name: 'group_topics',
+      sql: `CREATE TABLE IF NOT EXISTS group_topics (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        group_id   INT NOT NULL,
+        name       VARCHAR(200) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_topic (group_id, name),
+        FOREIGN KEY (group_id) REFERENCES \`groups\`(id) ON DELETE CASCADE
+      )`,
+    },
+    {
+      name: 'topic_ratings',
+      sql: `CREATE TABLE IF NOT EXISTS topic_ratings (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        group_id   INT NOT NULL,
+        topic_id   INT NOT NULL,
+        user_id    INT NOT NULL,
+        status     ENUM('understood','reviewing','struggling') NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_rating (topic_id, user_id),
+        FOREIGN KEY (group_id)  REFERENCES \`groups\`(id)      ON DELETE CASCADE,
+        FOREIGN KEY (topic_id)  REFERENCES group_topics(id)    ON DELETE CASCADE,
+        FOREIGN KEY (user_id)   REFERENCES users(id)           ON DELETE CASCADE
+      )`,
+    },
   ];
 
   const runNext = (i) => {

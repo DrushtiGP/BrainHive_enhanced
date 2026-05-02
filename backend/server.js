@@ -12,6 +12,9 @@ const sessionRoutes    = require('./routes/sessions');
 const messageRoutes    = require('./routes/messages');
 const adminRoutes      = require('./routes/admin');
 const agentRoutes      = require('./routes/agents');
+const resourceRoutes   = require('./routes/resources');
+const flashcardRoutes  = require('./routes/flashcards');
+const progressRoutes   = require('./routes/progress');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -46,6 +49,13 @@ app.use('/sessions',       sessionRoutes);
 app.use('/messages',       messageRoutes);
 app.use('/admin',          adminRoutes);
 app.use('/agents',         agentRoutes);
+app.use('/groups/:groupId/resources',   resourceRoutes);
+app.use('/groups/:groupId/flashcards',  flashcardRoutes);
+app.use('/groups/:groupId/progress',   progressRoutes);
+
+// Serve uploaded files statically (for inline preview)
+const path = require('path');
+app.use('/uploads', require('express').static(path.join(__dirname, 'uploads')));
 
 app.listen(port, () => {
   console.log(`BrainHive server running on port ${port}`);

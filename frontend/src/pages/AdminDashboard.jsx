@@ -22,14 +22,42 @@ const StatCard = ({ label, value, highlight }) => (
   </div>
 );
 
+const PAGE_SIZE = 10;
+
+const Pagination = ({ page, total, pageSize, onPage }) => {
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) return null;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, justifyContent: 'flex-end' }}>
+      <button
+        className="btn-secondary"
+        style={{ padding: '4px 12px', fontSize: 13 }}
+        disabled={page === 1}
+        onClick={() => onPage(page - 1)}
+      >← Prev</button>
+      <span style={{ fontSize: 13, color: '#6b7280' }}>Page {page} of {totalPages} ({total} total)</span>
+      <button
+        className="btn-secondary"
+        style={{ padding: '4px 12px', fontSize: 13 }}
+        disabled={page === totalPages}
+        onClick={() => onPage(page + 1)}
+      >Next →</button>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const [tab, setTab] = useState('users');
 
   // Users
   const [users, setUsers] = useState([]);
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [usersPage, setUsersPage] = useState(1);
   // Groups
   const [groups, setGroups] = useState([]);
+  const [groupsTotal, setGroupsTotal] = useState(0);
+  const [groupsPage, setGroupsPage] = useState(1);
   // Pending
   const [pendingRequests, setPendingRequests] = useState([]);
   // Onboarding
@@ -46,25 +74,39 @@ const AdminDashboard = () => {
   useEffect(() => {
     setError('');
     setOnboardResult('');
-    if (tab === 'users')    fetchUsers();
-    if (tab === 'groups')   fetchGroups();
+    if (tab === 'users')    fetchUsers(1);
+    if (tab === 'groups')   fetchGroups(1);
     if (tab === 'pending')  fetchPending();
     if (tab === 'health')   fetchHealth();
-    if (tab === 'onboard')  { fetchUsers(); fetchGroups(); }
+    if (tab === 'onboard')  { fetchUsers(1); fetchGroups(1); }
   }, [tab]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = usersPage) => {
     try {
-      const res = await api.get('/admin/users');
+      const res = await api.get('/admin/users', { params: { page, pageSize: PAGE_SIZE } });
       setUsers(res.data.users || []);
+      setUsersTotal(res.data.total || 0);
+      setUsersPage(page);
     } catch (e) { setError('Failed to load users.'); }
   };
 
-  const fetchGroups = async () => {
+  const fetchGroups = async (page = groupsPage) => {
     try {
-      const res = await api.get('/admin/groups');
+      const res = await api.get('/admin/groups', { params: { page, pageSize: PAGE_SIZE } });
       setGroups(res.data.groups || []);
+      setGroupsTotal(res.data.total || 0);
+      setGroupsPage(page);
     } catch (e) { setError('Failed to load groups.'); }
+  };
+
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      await api.put(`/admin/users/${userId}/role`, { role: newRole });
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      dispatch(addNotification({ type: 'success', message: `Role updated to '${newRole}'.` }));
+    } catch (e) {
+      setError(e.response?.data?.error || 'Failed to update role.');
+    }
   };
 
   const fetchPending = async () => {
@@ -183,7 +225,7 @@ const AdminDashboard = () => {
       {tab === 'users' && (
         <div style={{ marginTop: 16 }}>
           <p style={{ color: '#131415ff', fontSize: 13, marginBottom: 12 }}>
-            {users.length} registered user{users.length !== 1 ? 's' : ''}
+            {usersTotal} registered user{usersTotal !== 1 ? 's' : ''}
           </p>
           <table className="data-table">
             <thead>
@@ -196,15 +238,22 @@ const AdminDashboard = () => {
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>
-                    <span style={{
-                      background: u.role === 'admin' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.06)',
-                      borderRadius: 4,
-                      padding: '2px 8px',
-                      fontSize: 12,
-                      color: u.role === 'admin' ? '#818cf8' : '#0f1011ff',
-                    }}>
-                      {u.role || 'user'}
-                    </span>
+                    <select
+                      value={u.role || 'user'}
+                      onChange={e => handleRoleChange(u.id, e.target.value)}
+                      style={{
+                        background: u.role === 'admin' ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.06)',
+                        border: `1px solid ${u.role === 'admin' ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                        borderRadius: 4,
+                        padding: '3px 8px',
+                        fontSize: 12,
+                        color: u.role === 'admin' ? '#818cf8' : '#374151',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="user">user</option>
+                      <option value="admin">admin</option>
+                    </select>
                   </td>
                   <td style={{ color: '#09090bff', fontSize: 12 }}>{new Date(u.created_at).toLocaleDateString()}</td>
                   <td>
@@ -219,6 +268,7 @@ const AdminDashboard = () => {
               )}
             </tbody>
           </table>
+          <Pagination page={usersPage} total={usersTotal} pageSize={PAGE_SIZE} onPage={fetchUsers} />
         </div>
       )}
 
@@ -226,7 +276,7 @@ const AdminDashboard = () => {
       {tab === 'groups' && (
         <div style={{ marginTop: 16 }}>
           <p style={{ color: '#07080aff', fontSize: 13, marginBottom: 12 }}>
-            {groups.length} group{groups.length !== 1 ? 's' : ''} on the platform
+            {groupsTotal} group{groupsTotal !== 1 ? 's' : ''} on the platform
           </p>
           <table className="data-table">
             <thead>
@@ -252,6 +302,7 @@ const AdminDashboard = () => {
               )}
             </tbody>
           </table>
+          <Pagination page={groupsPage} total={groupsTotal} pageSize={PAGE_SIZE} onPage={fetchGroups} />
         </div>
       )}
 

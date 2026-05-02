@@ -85,12 +85,25 @@ router.post('/', requireAuth, (req, res) => {
   );
 });
 
-// GET /groups — all groups
+// GET /groups — all groups, optional ?search= filter
 router.get('/', requireAuth, (req, res) => {
-  db.query('SELECT * FROM `groups`', (err, results) => {
-    if (err) return res.status(500).json({ error: 'Failed to fetch groups.' });
-    res.json({ groups: results.length ? results : [] });
-  });
+  const search = req.query.search?.trim() || '';
+  if (search) {
+    const like = `%${search}%`;
+    db.query(
+      `SELECT * FROM \`groups\` WHERE name LIKE ? OR description LIKE ? ORDER BY name ASC`,
+      [like, like],
+      (err, results) => {
+        if (err) return res.status(500).json({ error: 'Failed to fetch groups.' });
+        res.json({ groups: results || [] });
+      }
+    );
+  } else {
+    db.query('SELECT * FROM `groups` ORDER BY name ASC', (err, results) => {
+      if (err) return res.status(500).json({ error: 'Failed to fetch groups.' });
+      res.json({ groups: results || [] });
+    });
+  }
 });
 
 // GET /groups/user/:userId — groups the user is an accepted member of

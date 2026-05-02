@@ -31,7 +31,7 @@ const Header = () => {
 
   return (
     <nav style={{
-      padding: '0 32px',
+      padding: '0 48px',
       background: '#0f0f1a',
       display: 'flex',
       alignItems: 'center',

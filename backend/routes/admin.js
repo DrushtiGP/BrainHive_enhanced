@@ -26,6 +26,20 @@ router.get('/users', (req, res) => {
   });
 });
 
+// PUT /admin/users/:userId/role — update a user's role
+router.put('/users/:userId/role', (req, res) => {
+  const { role } = req.body;
+  const VALID_ROLES = ['admin', 'user'];
+  if (!role || !VALID_ROLES.includes(role)) {
+    return res.status(400).json({ error: "Invalid role. Must be 'admin' or 'user'." });
+  }
+  db.query('UPDATE users SET role = ? WHERE id = ?', [role, req.params.userId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Internal server error.' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found.' });
+    res.json({ message: 'Role updated successfully.', role });
+  });
+});
+
 // DELETE /admin/users/:userId — delete a user account
 router.delete('/users/:userId', (req, res) => {
   db.query('DELETE FROM users WHERE id = ?', [req.params.userId], (err, result) => {

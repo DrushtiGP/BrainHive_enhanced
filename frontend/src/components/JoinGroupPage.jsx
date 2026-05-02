@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { addNotification } from '../store/notificationsSlice';
@@ -33,27 +33,43 @@ const howItWorks = [
   },
 ];
 
+const DEBOUNCE_MS = 350;
+
 const JoinGroupPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
-  const [allGroups, setAllGroups] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [joining, setJoining] = useState(false);
+  const debounceRef = useRef(null);
 
-  useEffect(() => {
-    api.get('/groups')
-      .then((res) => setAllGroups(res.data.groups || []))
-      .catch(() => dispatch(addNotification({ type: 'error', message: 'Failed to fetch groups.' })));
+  const fetchGroups = useCallback(async (term) => {
+    setLoading(true);
+    try {
+      const params = term ? { search: term } : {};
+      const res = await api.get('/groups', { params });
+      setGroups(res.data.groups || []);
+    } catch {
+      dispatch(addNotification({ type: 'error', message: 'Failed to fetch groups.' }));
+    } finally {
+      setLoading(false);
+    }
   }, [dispatch]);
 
-  const filtered = allGroups.filter(g =>
-    g.name.toLowerCase().includes(search.toLowerCase()) ||
-    (g.description || '').toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => { fetchGroups(''); }, [fetchGroups]);
 
-  const selectedGroup = allGroups.find(g => g.id === parseInt(selectedGroupId));
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearch(val);
+    setSelectedGroupId('');
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchGroups(val.trim()), DEBOUNCE_MS);
+  };
+
+  const selectedGroup = groups.find(g => g.id === parseInt(selectedGroupId));
 
   const handleJoin = async () => {
     if (!selectedGroupId) return;
@@ -79,28 +95,64 @@ const JoinGroupPage = () => {
           <p className="page-subtitle">Find a group that matches your interests.</p>
 
           <div style={{ marginTop: 32 }}>
-            <input
-              className="search-input"
-              type="text"
-              placeholder="Search by name or description..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setSelectedGroupId(''); }}
-            />
+            {/* Search input with icon */}
+            <div style={{ position: 'relative', marginBottom: 12 }}>
+              <svg
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+                width={16} height={16} viewBox="0 0 24 24" fill="none"
+                stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                className="search-input"
+                type="text"
+                placeholder="Search by name or description..."
+                value={search}
+                onChange={handleSearchChange}
+                style={{ paddingLeft: 36 }}
+              />
+              {loading && (
+                <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#9ca3af' }}>
+                  Searching...
+                </span>
+              )}
+              {search && !loading && (
+                <button
+                  onClick={() => { setSearch(''); setSelectedGroupId(''); fetchGroups(''); }}
+                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 18, lineHeight: 1 }}
+                  aria-label="Clear search"
+                >×</button>
+              )}
+            </div>
 
-            {filtered.length === 0 ? (
+            {/* Result count */}
+            {!loading && (
+              <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
+                {groups.length} group{groups.length !== 1 ? 's' : ''} found
+                {search ? ` for "${search}"` : ''}
+              </p>
+            )}
+
+            {/* Group list */}
+            {groups.length === 0 && !loading ? (
               <div className="empty-state" style={{ padding: '24px 0', textAlign: 'left' }}>
-                {search ? 'No groups match your search.' : 'No groups available to join.'}
+                {search ? `No groups match "${search}".` : 'No groups available to join.'}
               </div>
             ) : (
               <div className="group-search-list">
-                {filtered.map((g) => (
+                {groups.map((g) => (
                   <div
                     key={g.id}
                     className={`group-search-item${selectedGroupId === String(g.id) ? ' selected' : ''}`}
                     onClick={() => setSelectedGroupId(String(g.id))}
                   >
-                    <div style={{ fontWeight: 600, color: '#1e1b4b' }}>{g.name}</div>
-                    {g.description && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>{g.description}</div>}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <div style={{ fontWeight: 600, color: '#1e1b4b' }}>{g.name}</div>
+                    </div>
+                    {g.description && (
+                      <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>{g.description}</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -130,7 +182,7 @@ const JoinGroupPage = () => {
           ) : (
             <div>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 24 }}>How joining works</h3>
-              {howItWorks.map((step, i) => (
+              {howItWorks.map((step) => (
                 <div key={step.title} style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
                   <div style={{ width: 36, height: 36, borderRadius: 10, background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Icon d={step.icon} size={16} />

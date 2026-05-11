@@ -323,7 +323,6 @@ function callVLLM({ system, user }) {
 
 
 function callMock({ system, user }) {
-  // Detect which agent is calling based on system prompt keywords
   if (system.includes('Study Buddy')) {
     return Promise.resolve(
       '**Study Buddy (Mock):** Great question! This is a placeholder response. ' +
@@ -336,6 +335,17 @@ function callMock({ system, user }) {
       '**Key Takeaways:**\n- This is a mock summary\n\n' +
       '**Action Items:**\n- Add AI_API_KEY to enable real summaries\n\n' +
       '**Open Questions:**\n- None identified'
+    );
+  }
+  if (system.includes('flashcard')) {
+    const topicMatch = user.match(/topic: "(.+)"/i);
+    const topic = topicMatch ? topicMatch[1] : '';
+    const words = topic.split(/\s+/);
+    const hasRealWord = words.some(w => w.length >= 3);
+    const uniqueChars = new Set(topic.toLowerCase().replace(/\s/g, '')).size;
+    if (!hasRealWord || uniqueChars < 3) return Promise.resolve('[]');
+    return Promise.resolve(
+      '[{"front":"What is this topic about?","back":"Add your AI_API_KEY in backend/.env to generate real flashcards for this topic."}]'
     );
   }
   if (system.includes('recommendation')) {

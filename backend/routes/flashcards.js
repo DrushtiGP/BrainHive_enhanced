@@ -71,6 +71,14 @@ router.post('/generate', requireAuth, requireMember, async (req, res) => {
   const { topic, count = 6 } = req.body;
   if (!topic?.trim()) return res.status(400).json({ error: 'Topic is required.' });
 
+  // Reject obviously nonsensical input
+  const words = topic.trim().split(/\s+/);
+  const hasRealWord = words.some(w => w.length >= 3);
+  const uniqueChars = new Set(topic.toLowerCase().replace(/\s/g, '')).size;
+  if (!hasRealWord || uniqueChars < 3) {
+    return res.status(400).json({ error: 'Please provide a valid academic topic.' });
+  }
+
   const safeCount = Math.min(Math.max(parseInt(count) || 6, 3), 10);
 
   const prompt = {

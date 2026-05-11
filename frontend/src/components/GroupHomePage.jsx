@@ -122,6 +122,16 @@ const GroupHomePage = () => {
   const handleAddTopic = async (e) => {
     e.preventDefault();
     if (!newTopicName.trim()) return;
+
+    // Reject nonsense input
+    const words = newTopicName.trim().split(/\s+/);
+    const hasRealWord = words.some(w => w.length >= 3);
+    const isRepetitive = new Set(newTopicName.toLowerCase().replace(/\s/g, '')).size < 3;
+    if (!hasRealWord || isRepetitive) {
+      dispatch(addNotification({ type: 'error', message: 'Please enter a valid topic name.' }));
+      return;
+    }
+
     setAddingTopic(true);
     try {
       await api.post(`/groups/${groupId}/progress/topics`, { name: newTopicName });
@@ -180,6 +190,16 @@ const GroupHomePage = () => {
   const handleGenerateCards = async (e) => {
     e.preventDefault();
     if (!genTopic.trim()) return;
+
+    // Basic sanity check — reject obvious nonsense
+    const words = genTopic.trim().split(/\s+/);
+    const hasRealWord = words.some(w => w.length >= 3);
+    const isRepetitive = new Set(genTopic.toLowerCase().replace(/\s/g, '')).size < 3;
+    if (!hasRealWord || isRepetitive) {
+      dispatch(addNotification({ type: 'error', message: 'Please enter a valid academic topic.' }));
+      return;
+    }
+
     setGenerating(true);
     try {
       const res = await api.post(`/groups/${groupId}/flashcards/generate`, { topic: genTopic, count: 6 });
